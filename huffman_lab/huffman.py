@@ -1,5 +1,3 @@
-import pickle
-
 class Node: # Узел дерева
     def __init__(self, char, freq):
         self.char = char
@@ -7,6 +5,25 @@ class Node: # Узел дерева
         self.left = None
         self.right = None
 
+def serialize_tree(node): # Дерево в строку
+    if node.char is not None:
+        return '1' + format(ord(node.char), '016b')  # 1 + 16 бит символа
+    else:
+        return '0' + serialize_tree(node.left) + serialize_tree(node.right)
+
+def deserialize_tree(bits, index=0): #Из строки в дерево
+    if bits[index] == '1':
+        char_bits = bits[index + 1:index + 17]
+        char = chr(int(char_bits, 2))
+        return Node(char, 0), index + 17
+    else:
+        left, next_index = deserialize_tree(bits, index + 1)
+        right, next_index = deserialize_tree(bits, next_index)
+        node = Node(None, 0)
+        node.left = left
+        node.right = right
+        return node, next_index
+        
 def count_frequencies(text): # Подсчет частоты
     freq = {}
     for ch in text:
@@ -58,7 +75,7 @@ def bytes_to_bits(byte_data): # Байт в бит
         bits = bits[:-padding]
     return bits
 
-def huffman_encode(input_path, output_path): # Кодирование
+def huffman_encode(input_path, output_path): # Кодируем
     with open(input_path, 'r', encoding='utf-8') as f:
         text = f.read()
 
@@ -66,27 +83,36 @@ def huffman_encode(input_path, output_path): # Кодирование
     root = build_tree(freq)
     codes = generate_codes(root)
     encoded_text = ''.join(codes[ch] for ch in text)
+
+    tree_bits = serialize_tree(root)
+    tree_bytes = bits_to_bytes(tree_bits)
     encoded_bytes = bits_to_bytes(encoded_text)
 
     with open(output_path, 'wb') as f:
-        pickle.dump(codes, f)      
-        f.write(encoded_bytes)       
+        f.write(len(tree_bytes).to_bytes(2, 'big'))
+        f.write(tree_bytes)
+        f.write(encoded_bytes)   
 
-def huffman_decode(input_path, output_path): # Декодирование
+def huffman_decode(input_path, output_path): # Декодируем
     with open(input_path, 'rb') as f:
-        codes = pickle.load(f)  
-        encoded_bytes = f.read()
+        size_bytes = f.read(2)
+        tree_size = int.from_bytes(size_bytes, 'big')
 
-    inverse_codes = {v: k for k, v in codes.items()}
-    encoded_text = bytes_to_bits(encoded_bytes)
+        tree_data = f.read(tree_size)
+        encoded_data = f.read()
 
-    current_code = ''
+    tree_bits = bytes_to_bits(tree_data)
+    root, _ = deserialize_tree(tree_bits)
+
+    encoded_bits = bytes_to_bits(encoded_data)
+    
+    node = root
     decoded_text = ''
-    for bit in encoded_text:
-        current_code += bit
-        if current_code in inverse_codes:
-            decoded_text += inverse_codes[current_code]
-            current_code = ''
+    for bit in encoded_bits:
+        node = node.left if bit == '0' else node.right
+        if node.char is not None:
+            decoded_text += node.char
+            node = root
 
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(decoded_text)
