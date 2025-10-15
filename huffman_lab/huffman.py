@@ -11,7 +11,7 @@ def serialize_tree(node): # Дерево в строку
     else:
         return '0' + serialize_tree(node.left) + serialize_tree(node.right)
 
-def deserialize_tree(bits, index=0): #Из строки в дерево
+def deserialize_tree(bits, index=0): # Из строки в дерево
     if bits[index] == '1':
         char_bits = bits[index + 1:index + 17]
         char = chr(int(char_bits, 2))
