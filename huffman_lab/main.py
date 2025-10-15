@@ -21,9 +21,9 @@ while True:
             huffman_decode(encoded, decoded)
             print("Файл декодирован.")
         case 3:
+            original = input("Введите местоположения первого файла: ") 
+            decoded = input("Введите местоположения второго файла: ") 
             if compare_files(original, decoded):
-                original = input("Введите местоположения первого файла: ") 
-                decoded = input("Введите местоположения второго файла: ") 
                 print("✅ Файлы совпадают!")
             else:
                 print("❌ Файлы не совпадают.")
