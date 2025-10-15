@@ -11,21 +11,21 @@ while True:
             print("Удачи")
             break
         case 1:
-            original = input("Введите местоположения файла: ")
-            encoded = input("Как будет называться файл? (без .huff)") + ".huff"
+            original = input("Введите название файла: ")
+            encoded = input("Как будет называться файл? (без .huff): ") + ".huff"
             huffman_encode(original, encoded)
             print("Файл закодирован.")
         case 2:
-            encoded = input("Введите местоположения файла: ")
-            decoded = input("Как будет называться файл? (без .txt)") + "_decoded.txt"
+            encoded = input("Введите название: ")
+            decoded = input("Как будет называться файл? (без .txt): ") + "_decoded.txt"
             huffman_decode(encoded, decoded)
             print("Файл декодирован.")
         case 3:
-            original = input("Введите местоположения первого файла: ") 
-            decoded = input("Введите местоположения второго файла: ") 
+            original = input("Введите название первого файла: ") 
+            decoded = input("Введите название второго файла: ") 
             if compare_files(original, decoded):
-                print("✅ Файлы совпадают!")
+                print("Файлы совпадают!")
             else:
-                print("❌ Файлы не совпадают.")
+                print("Файлы не совпадают.")
         case _:
             print("Выберите от 0-3")
