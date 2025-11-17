@@ -7,10 +7,8 @@ FIRST_QTR = (MAX_VALUE + 1) // 4
 HALF = FIRST_QTR * 2
 THIRD_QTR = FIRST_QTR * 3
 
-
 def arithmetic_encode(input_file, output_file): #Кодирование
     data = list(Path(input_file).read_bytes())
-
     freq = Counter(data)  #Таблица частот
     for i in range(256):
         if freq.get(i, 0) == 0:
@@ -20,8 +18,8 @@ def arithmetic_encode(input_file, output_file): #Кодирование
     done = [0]
     for v in counts:
         done.append(done[-1] + v)
+        
     total = done[-1]
-
     lo, hi = 0, MAX_VALUE
     bits_to_follow = 0
     out_bits = []
@@ -75,15 +73,14 @@ def arithmetic_encode(input_file, output_file): #Кодирование
             f.write(v.to_bytes(4, "big"))
         f.write(out_bytes)
 
-
     header = 4 + 256 * 4
     compressed = header + len(out_bytes)
     ratio = len(data) / compressed if compressed else 1
+    
     print(f"Кодирование завершено за {enc_time:.4f} сек")
     print(f"Исходный размер: {len(data)} байт")
     print(f"Сжатый размер:  {compressed} байт")
     print(f"Степень сжатия: {ratio:.2f}x")
-
 
 def arithmetic_decode(input_file, output_file): #Декодирование
     raw = Path(input_file).read_bytes()
@@ -92,12 +89,10 @@ def arithmetic_decode(input_file, output_file): #Декодирование
 
     counts = [int.from_bytes(raw[pos + i * 4:pos + (i + 1) * 4], "big") for i in range(256)]
     pos += 256 * 4
-
     done = [0]
     for v in counts:
         done.append(done[-1] + v)
     total = done[-1]
-
     bits = []
     for byte in raw[pos:]:
         for i in range(8):
@@ -114,14 +109,12 @@ def arithmetic_decode(input_file, output_file): #Декодирование
 
     lo, hi = 0, MAX_VALUE
     value = 0
-    for _ in range(16):
+    for i in range(16):
         value = (value << 1) | read_bit()
-
     decoded = bytearray()
     start = time.time()
 
-    
-    for _ in range(n):
+    for i in range(n):
         r = hi - lo + 1
         freq = ((value - lo + 1) * total - 1) // r
 
@@ -155,7 +148,6 @@ def arithmetic_decode(input_file, output_file): #Декодирование
     dec_time = time.time() - start
     print(f"Декодирование завершено за {dec_time:.4f} сек")
     print(f"Размер восстановленного файла: {len(decoded)} байт")
-
 
 def compare_files(file1, file2): #Сравнение
     with open(file1, "rb") as f1, open(file2, "rb") as f2:
